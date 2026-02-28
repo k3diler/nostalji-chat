@@ -9,7 +9,30 @@ const io = new Server(server);
 app.use(express.static("public"));
 
 const rooms = new Map();
-const getUsers = (room) => Array.from(rooms.get(room) || []);
+// --- TAG SYSTEM (v1: in-memory) ---
+const userStats = new Map();
+const userByNick = new Map();
+const approvedTags = new Map();
+
+const roomTagCatalog = {
+  genel: [
+    { key: "rank_new", label: "Yeni Üye", kind: "auto" },
+    { key: "rank_active", label: "Aktif Üye", kind: "auto" },
+    { key: "rank_senior", label: "Kıdemli", kind: "auto" },
+    { key: "rank_legend", label: "Efsane", kind: "auto" },
+  ]
+};
+
+function getAutoRank(msgCount) {
+  if (msgCount >= 200) return { key: "rank_legend", label: "Efsane" };
+  if (msgCount >= 50) return { key: "rank_senior", label: "Kıdemli" };
+  if (msgCount >= 10) return { key: "rank_active", label: "Aktif Üye" };
+  return { key: "rank_new", label: "Yeni Üye" };
+}
+
+function keyFor(room, nick) {
+  return `${room}:${nick}`;
+}const getUsers = (room) => Array.from(rooms.get(room) || []);
 
 io.on("connection", (socket) => {
   socket.on("join", ({ room, nick }) => {
