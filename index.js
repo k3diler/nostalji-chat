@@ -46,8 +46,17 @@ io.on("connection", (socket) => {
 
     if (!rooms.has(room)) rooms.set(room, new Set());
     rooms.get(room).add(nick);
+// stats init
+userStats.set(socket.id, { msgCount: 0 });
+userByNick.set(keyFor(room, nick), socket.id);
 
-    io.to(room).emit("system", `-!- ${nick} has joined #${room}`);
+const roomTags = roomTagCatalog[room] || [];
+const approved = Array.from(approvedTags.get(keyFor(room, nick)) || []);
+
+socket.emit("tagCatalog", roomTags);
+socket.emit("myApprovedTags", approved);
+socket.emit("system", `-!- TAG INIT OK`);    io.to(room).emit("system", `-!- ${nick} has joined #${room}`);
+   
     io.to(room).emit("users", getUsers(room));
   });
 
