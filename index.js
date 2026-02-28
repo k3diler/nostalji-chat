@@ -69,8 +69,15 @@ socket.emit("system", `-!- TAG INIT OK`);    io.to(room).emit("system", `-!- ${n
     if (!room || !nick) return;
 
     io.to(room).emit("message", { nick, text: text.slice(0, 300) });
-  });
 
+   const stats = userStats.get(socket.id);
+if (stats) {
+  stats.msgCount += 1;
+  const autoRank = getAutoRank(stats.msgCount);
+  socket.emit("myAutoRank", autoRank);
+} 
+});
+  
   socket.on("disconnect", () => {
     const room = socket.data.room;
     const nick = socket.data.nick;
