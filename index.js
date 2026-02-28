@@ -38,7 +38,10 @@ io.on("connection", (socket) => {
   socket.on("join", ({ room, nick }) => {
     room = (room || "genel").toLowerCase();
     nick = (nick || "").slice(0, 20);
-    if (!nick) return;
+    io.to(room).emit("message", {
+  nick: "SYSTEM",
+  text: "TAG INIT TEST"
+});    if (!nick) return;
 
     socket.data.room = room;
     socket.data.nick = nick;
