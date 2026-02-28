@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Nostalji Chat</title>
+<style>
+body{font-family:monospace;padding:14px}
+.wrap{display:grid;grid-template-columns:1fr 200px;gap:10px}
+#log,#users{border:1px solid #ccc;height:60vh;overflow:auto;padding:8px}
+.sys{opacity:.6;font-style:italic}
+</style>
+</head>
+<body>
+<h2>#genel</h2>
+<input id="nick" placeholder="Nick">
+<button onclick="join()">Join</button>
+
+<div id="chat" style="display:none">
+<div class="wrap">
+<div id="log"></div>
+<div id="users"></div>
+</div>
+<input id="msg" placeholder="Mesaj">
+<button onclick="send()">Send</button>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket=io();
+let nick="";
+function join(){
+nick=document.getElementById("nick").value;
+if(!nick)return alert("Nick yaz 🙂");
+socket.emit("join",{room:"genel",nick});
+document.getElementById("chat").style.display="block";
+}
+socket.on("system",t=>add(t,"sys"));
+socket.on("message",d=>add("<"+d.nick+"> "+d.text));
+socket.on("users",u=>{
+const el=document.getElementById("users");
+el.innerHTML="";
+u.forEach(n=>{let d=document.createElement("div");d.textContent=n;el.appendChild(d)});
+});
+function send(){
+let t=document.getElementById("msg").value;
+socket.emit("message",{text:t});
+document.getElementById("msg").value="";
+}
+function add(t,c){
+let d=document.createElement("div");
+if(c)d.className=c;
+d.innerHTML=t;
+document.getElementById("log").appendChild(d);
+}
+</script>
+</body>
+</html>
